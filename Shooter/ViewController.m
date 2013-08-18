@@ -19,6 +19,14 @@
  http://stackoverflow.com/questions/4710977/audio-will-make-avcapturesession-terminate
  
  
+ show record progress
+ limit record to 30 seconds
+ show preview in new view controller
+ display thumbnails on UIview
+ select thumbnail
+ 
+  
+ 
  */
 
 
@@ -267,10 +275,7 @@
             BOOL result = [composition insertTimeRange:editRange ofAsset:sourceAsset atTime:composition.duration error:&editError];
             if(result)
             {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    progressBar.progress = CMTimeGetSeconds(composition.duration) / (float)30;
-                    NSLog(@"progress: %f", progressBar.progress);
-                });
+                
             }
         }];
         
@@ -382,6 +387,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         {
             [videoWriter startWriting];
             [videoWriter startSessionAtSourceTime:lastSampleTime];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"Buffer contains [DURATION:%.1fms] worth of audio", CMTimeGetSeconds(CMSampleBufferGetDuration(sampleBuffer)));
+                float seconds = CMTimeGetSeconds(CMSampleBufferGetDuration(sampleBuffer));
+                float actual = [progressBar progress];
+                progressBar.progress = seconds / (float)30;
+                NSLog(@"progress: %f", progressBar.progress);
+            });
         }
         
         if( captureOutput == videoOutput )
